@@ -16,9 +16,11 @@ class RedmineGrackAuth < Rack::Auth::Basic
     return false if !identifier
     permission = (@req.request_method == "POST" && Regexp.new("(.*?)/git-receive-pack$").match(@req.path_info) ? 'rw' : 'r')
 
+    user = auth.username
+    password = auth.credentials[1]
     begin
-      open("#{url}grack/xml/#{identifier}/#{permission}", :http_basic_authentication => [auth.user, auth.pass]) {}
-    rescue
+      open("#{url}grack/xml/#{identifier}/#{permission}", :http_basic_authentication => [user, password]) {}
+    rescue OpenURI::HTTPError
       return false
     end
 
@@ -32,7 +34,7 @@ class RedmineGrackAuth < Rack::Auth::Basic
     return unauthorized if(not defined?($grackConfig))
     return unauthorized if($grackConfig[:require_ssl_for_auth] && @req.scheme != "https")
 
-    auth = Request.new(env)
+    auth = Rack::Auth::Basic::Request.new(env)
     return unauthorized unless auth.provided?
     return bad_request unless auth.basic?
     return unauthorized unless valid?(auth)
@@ -46,9 +48,7 @@ class RedmineGrackAuth < Rack::Auth::Basic
 
     paths.each {|re|
       if m = Regexp.new(re).match(@req.path)
-        projPath = m[1];
-        dir  = projPath.gsub(/^.*\//, "")
-        identifier = projDir.gsub(/\.git$/, "")
+        identifier = m[1][/([^\/]+)\.git/, 1]
         return (identifier == '' ? nil : identifier)
       end
     }
