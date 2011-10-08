@@ -12,7 +12,7 @@ config = {
 
   :use_redmine_auth      => true,
   :redmine               => 'https://posativ.org/redmine',
-  :grack_suburi          => '/git/'
+  :grack_suburi          => '/git'
 }
 
 
