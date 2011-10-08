@@ -50,8 +50,9 @@ class RedmineGrackAuth < Rack::Auth::Basic
   def get_project
     paths = ["(.*?)/git-upload-pack$", "(.*?)/git-receive-pack$", "(.*?)/info/refs$", "(.*?)/HEAD$", "(.*?)/objects" ]
 
+    suburi = $grackConfig[:grack_suburi] || ''
     paths.each {|re|
-      if m = Regexp.new("/git/"+re).match(@req.path)
+      if m = Regexp.new(File.join('/', suburi, re)).match(@req.path)
         identifier = m[1][/([^\/]+)\.git/, 1]
         return (identifier == '' ? nil : identifier)
       end

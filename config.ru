@@ -5,13 +5,14 @@ use Rack::ShowExceptions
 require 'lib/git_http'
 
 config = {
-  :project_root          => "/home/www/repositories",
+  :project_root          => "/home/www/repositories/git",
   :git_path              => '/usr/bin/git',
   :upload_pack           => true,
   :receive_pack          => true,
 
   :use_redmine_auth      => true,
-  :redmine               => 'https://posativ.org/redmine'
+  :redmine               => 'https://posativ.org/redmine',
+  :grack_suburi          => '/git/'
 }
 
 
