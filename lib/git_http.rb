@@ -44,7 +44,7 @@ class GitHttp
       return render_method_not_allowed if cmd == 'not_allowed'
       return render_not_found if !cmd
 
-      @dir = get_git_dir(path)
+      @dir = get_git_dir(path[@config[:grack_suburi].length, path.length])
       return render_not_found if !@dir
 
       Dir.chdir(@dir) do
@@ -175,7 +175,7 @@ class GitHttp
       if File.exists?(path) # TODO: check is a valid git directory
         return path
       end
-      false
+      return false
     end
 
     def get_service_type

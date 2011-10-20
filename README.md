@@ -1,14 +1,30 @@
-Grack - Ruby/Rack Git Smart-HTTP Server Handler
-===============================================
+Grack - Ruby/Rack Git Smart-HTTP Server Handler + Redmine Auth
+==============================================================
+
+This particular grack fork adds redmine-based authentication/authorization for
+your git repositories. It needs REST interface enabled in redmine (>= 1.1), see
+*administration* -> *configuration* -> *authentication* -> *enable REST interface*.
+
+This is my working `config.ru` used at *https://posativ.org/redmine* to get
+a url scheme like *https://domain.tld/git/myproject.git*:
+
+    config = {
+      :project_root          => "/home/www/repositories/git",
+      :git_path              => '/usr/bin/git',
+      :upload_pack           => true,
+      :receive_pack          => true,
+
+      :use_redmine_auth      => true,
+      :redmine               => 'https://posativ.org/redmine',
+      :grack_suburi          => '/git/'
+    }
+    
+original README.md
+==================
 
 This project aims to replace the builtin git-http-backend CGI handler
 distributed with C Git with a Rack application.  This reason for doing this
 is to allow far more webservers to be able to handle Git smart http requests.
-
-This particular grack fork adds redmine-based
-authentication/authorization for your git repositories. It needs a
-redmine-plugin counterpart, which can be found at
-http://github.com/friflaj/redmine_grack
 
 The default git-http-backend only runs as a CGI script, and specifically is
 only targeted for Apache 2.x usage (it requires PATH_INFO to be set and 
