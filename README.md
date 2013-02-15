@@ -1,3 +1,5 @@
+(NOTE: This fork works for redmine 2.x)
+
 Grack - Ruby/Rack Git Smart-HTTP Server Handler + Redmine Auth
 ==============================================================
 

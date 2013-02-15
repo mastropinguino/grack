@@ -3,21 +3,22 @@ require 'rack/auth/abstract/request'
 require 'rack/auth/basic'
 require 'open-uri'
 require 'openssl'
+require 'rexml/document'
 
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 class RedmineGrackAuth < Rack::Auth::Basic
 
   def valid?(auth, identifier, url)
-
     user, pass = *auth.credentials[0, 2]
     permission = (@req.request_method == "POST" && Regexp.new("(.*?)/git-receive-pack$").match(@req.path_info) ? 'rw' : 'r')
 
     begin
-      r = /<membership><project name="#{identifier}" id=/
-      uri = "#{url}/users/current.xml?include=memberships"
-      return false unless r.match(open(uri,
-        :http_basic_authentication => [user, pass], 'User-Agent' => 'ruby').read())
+      uri = "#{url}/projects/#{identifier}/memberships.xml"
+      xml = open(uri, :http_basic_authentication => [user, pass], 'User-Agent' => 'ruby').read()
+      doc = REXML::Document.new(xml)
+      roles = doc.elements.collect('memberships/membership/roles/role') { |e| e }
+      return !!roles.length
     rescue OpenURI::HTTPError
       return false
     end
@@ -25,6 +26,7 @@ class RedmineGrackAuth < Rack::Auth::Basic
   end
 
   def call(env)
+
     @env = env  
     @req = Rack::Request.new(env)
     
@@ -35,7 +37,7 @@ class RedmineGrackAuth < Rack::Auth::Basic
     return unauthorized if(not defined?($grackConfig))
     return unauthorized if !identifier or !url
     return bad_request if !$grackConfig[:redmine]
-    
+   
     if auth.provided?
       return bad_request unless auth.basic?
       return unauthorized unless valid?(auth, identifier, url)
